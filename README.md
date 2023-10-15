@@ -23,7 +23,17 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
     </extensions>
     ```
 
-### How to use WindowsIdentityLayoutRenderer
+   Alternative register from code using [fluent configuration API](https://github.com/NLog/NLog/wiki/Fluent-Configuration-API):
+
+    ```csharp
+    LogManager.Setup().SetupExtensions(ext => {
+        ext.RegisterTarget<NLog.Targets.Wrappers.ImpersonatingTargetWrapper>();
+        ext.RegisterLayoutRenderer<NLog.LayoutRenderers.WindowsIdentityLayoutRenderer>();
+    });
+    ```
+
+### Example of Windows Identity UserName
+Example of `NLog.config`-file that outputs Windows Identity UserName:
 
 ```xml
 <nlog>
@@ -39,7 +49,8 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
 </nlog>
 ```
 
-### How to use ImpersonatingTargetWrapper
+### Example of Impersonating Windows Identity
+Example of `NLog.config`-file that apply ImpersonatingWrapper:
 
 ```xml
 <nlog>
@@ -47,12 +58,12 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
         <add assembly="NLog.WindowsIdentity"/>
     </extensions>
     <targets>
-        <target xsi:type="ImpersonatingWrapper" userName="xxx">
+        <target name="userConsole" xsi:type="ImpersonatingWrapper" userName="xxx">
             <target name="console" xsi:type="console" layout="${message}|User=${windows-identity}"  />
         </target>
     </targets>
     <rules>
-        <logger minLevel="Info" writeTo="console" />
+        <logger minLevel="Info" writeTo="userConsole" />
     </rules>
 </nlog>
 ```
