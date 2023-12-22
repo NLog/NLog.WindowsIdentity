@@ -210,9 +210,12 @@ namespace NLog.Targets.Wrappers
             if (_writeLogEvents is null)
                 _writeLogEvents = (l) => WrappedTarget.WriteAsyncLogEvents(l);
 
-            var firstLogEvent = logEvents.Count > 0 ? logEvents[0].LogEvent : null;
-            var newIdentity = ResolveNewIdentity(firstLogEvent, true);
-            RunImpersonated(newIdentity, _writeLogEvents, logEvents);
+            if (logEvents.Count > 0)
+            {
+                var firstLogEvent = logEvents[0].LogEvent;
+                var newIdentity = ResolveNewIdentity(firstLogEvent, true);
+                RunImpersonated(newIdentity, _writeLogEvents, logEvents);
+            }
         }
         private Action<IList<AsyncLogEventInfo>> _writeLogEvents;
 
