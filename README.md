@@ -33,7 +33,7 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
     ```
 
 ### Example of Windows Identity UserName
-Example of `NLog.config`-file that outputs Windows Identity UserName:
+Example of `NLog.config`-file that outputs username from [Windows Identity](https://github.com/NLog/NLog/wiki/Windows-Identity-Layout-Renderer) :
 
 ```xml
 <nlog>
@@ -50,7 +50,7 @@ Example of `NLog.config`-file that outputs Windows Identity UserName:
 ```
 
 ### Example of Impersonating Windows Identity
-Example of `NLog.config`-file that apply ImpersonatingWrapper:
+Example of `NLog.config`-file that apply [ImpersonatingWrapper](https://github.com/NLog/NLog/wiki/ImpersonatingWrapper-target) :
 
 ```xml
 <nlog>
@@ -58,12 +58,12 @@ Example of `NLog.config`-file that apply ImpersonatingWrapper:
         <add assembly="NLog.WindowsIdentity"/>
     </extensions>
     <targets>
-        <target name="userConsole" xsi:type="ImpersonatingWrapper" userName="xxx">
-            <target name="console" xsi:type="console" layout="${message}|User=${windows-identity}"  />
+        <target name="userFile" xsi:type="ImpersonatingWrapper" userName="xxx">
+            <target name="file" xsi:type="file" layout="${message}|User=${windows-identity}" filename="\\SecureNetPath\App.log"  />
         </target>
     </targets>
     <rules>
-        <logger minLevel="Info" writeTo="userConsole" />
+        <logger minLevel="Info" writeTo="userFile" />
     </rules>
 </nlog>
 ```
