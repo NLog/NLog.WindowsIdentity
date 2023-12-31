@@ -41,7 +41,7 @@ Example of `NLog.config`-file that outputs username from [Windows Identity](http
         <add assembly="NLog.WindowsIdentity"/>
     </extensions>
     <targets>
-        <target name="console" xsi:type="console" layout="${message}|User=${windows-identity}"  />
+        <target name="console" xsi:type="console" layout="${message}|User=${windows-identity}" />
     </targets>
     <rules>
         <logger minLevel="Info" writeTo="console" />
@@ -59,7 +59,7 @@ Example of `NLog.config`-file that apply [ImpersonatingWrapper](https://github.c
     </extensions>
     <targets>
         <target name="userFile" xsi:type="ImpersonatingWrapper" userName="xxx">
-            <target name="file" xsi:type="file" layout="${message}|User=${windows-identity}" filename="\\SecureNetPath\App.log"  />
+            <target name="file" xsi:type="file" layout="${message}|User=${windows-identity}" filename="\\SecureNetPath\App.log" />
         </target>
     </targets>
     <rules>
