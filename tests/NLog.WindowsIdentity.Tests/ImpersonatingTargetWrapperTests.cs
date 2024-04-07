@@ -55,7 +55,7 @@ namespace NLog.WindowsIdentity.Tests
             LogManager.ThrowExceptions = true;
         }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #else
         [Fact]
@@ -100,7 +100,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown();
         }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #else
         [Fact]
@@ -207,7 +207,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown();
         }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #else
         [Fact]
@@ -242,7 +242,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown(); // will not fail because Initialize() failed
         }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #else
         [Fact]
@@ -338,7 +338,7 @@ namespace NLog.WindowsIdentity.Tests
                     return;
                 }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
                 var user = new UserPrincipal(context);
                 user.SetPassword(NLogTestUserPassword);
                 user.Name = NLogTestUser;

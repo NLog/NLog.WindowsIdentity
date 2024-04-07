@@ -240,7 +240,7 @@ namespace NLog.Targets.Wrappers
             public string Domain { get; }
             public int Password { get; }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
             public WindowsIdentity Handle { get; }
             private readonly IntPtr _handle = IntPtr.Zero;
 #else
@@ -264,7 +264,7 @@ namespace NLog.Targets.Wrappers
                     throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
 
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
                 // adapted from:
                 // https://www.codeproject.com/csharp/cpimpersonation1.asp
                 if (!NativeMethods.DuplicateToken(logonHandle, (int)impersonationLevel, out _handle))
@@ -290,7 +290,7 @@ namespace NLog.Targets.Wrappers
             public void Close()
             {
                 Handle.Dispose();
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
                 if (_handle != IntPtr.Zero)
                     NativeMethods.CloseHandle(_handle);
 #endif
@@ -303,7 +303,7 @@ namespace NLog.Targets.Wrappers
 
             internal static void RunImpersonated<T>(NewIdentityHandle newIdentity, Action<T> executeOperation, T state)
             {
-#if NET35 || NET45 || NET46
+#if NETFRAMEWORK
                 WindowsImpersonationContext context = null;
                 try
                 {

@@ -38,7 +38,7 @@ namespace NLog.Internal
 
     internal static class NativeMethods
     {
-#if !NET35 && !NET45 && !NET46
+#if !NETFRAMEWORK
         // obtains user token
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 #if !NET35
