@@ -1,35 +1,35 @@
-// 
+//
 // Copyright (c) 2004-2021 Jaroslaw Kowalski <jaak@jkowalski.net>, Kim Christensen, Julian Verdurmen
-// 
+//
 // All rights reserved.
-// 
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
 // are met:
-// 
-// * Redistributions of source code must retain the above copyright notice, 
-//   this list of conditions and the following disclaimer. 
-// 
+//
+// * Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
 // * Redistributions in binary form must reproduce the above copyright notice,
 //   this list of conditions and the following disclaimer in the documentation
-//   and/or other materials provided with the distribution. 
-// 
-// * Neither the name of Jaroslaw Kowalski nor the names of its 
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of Jaroslaw Kowalski nor the names of its
 //   contributors may be used to endorse or promote products derived from this
-//   software without specific prior written permission. 
-// 
+//   software without specific prior written permission.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 // THE POSSIBILITY OF SUCH DAMAGE.
-// 
+//
 
 namespace NLog.Targets.Wrappers
 {
@@ -54,7 +54,7 @@ namespace NLog.Targets.Wrappers
     public class ImpersonatingTargetWrapper : WrapperTargetBase
     {
         private NewIdentityHandle _newIdentity;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ImpersonatingTargetWrapper" /> class.
         /// </summary>
@@ -240,11 +240,11 @@ namespace NLog.Targets.Wrappers
             public string Domain { get; }
             public int Password { get; }
 
-#if NETSTANDARD
-            public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle Handle { get; }
-#else
+#if NET35 || NET45 || NET46
             public WindowsIdentity Handle { get; }
             private readonly IntPtr _handle = IntPtr.Zero;
+#else
+            public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle Handle { get; }
 
 #endif
             public NewIdentityHandle(string userName, string domain, string password, SecurityLogOnType logOnType, LogOnProviderType logOnProvider, SecurityImpersonationLevel impersonationLevel)
@@ -264,9 +264,7 @@ namespace NLog.Targets.Wrappers
                     throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
 
-#if NETSTANDARD
-                Handle = logonHandle;
-#else
+#if NET35 || NET45 || NET46
                 // adapted from:
                 // https://www.codeproject.com/csharp/cpimpersonation1.asp
                 if (!NativeMethods.DuplicateToken(logonHandle, (int)impersonationLevel, out _handle))
@@ -279,6 +277,8 @@ namespace NLog.Targets.Wrappers
 
                 // create new identity using new primary token)
                 Handle = new WindowsIdentity(_handle);
+#else
+                Handle = logonHandle;
 #endif
             }
 
@@ -290,7 +290,7 @@ namespace NLog.Targets.Wrappers
             public void Close()
             {
                 Handle.Dispose();
-#if !NETSTANDARD
+#if NET35 || NET45 || NET46
                 if (_handle != IntPtr.Zero)
                     NativeMethods.CloseHandle(_handle);
 #endif
@@ -303,9 +303,7 @@ namespace NLog.Targets.Wrappers
 
             internal static void RunImpersonated<T>(NewIdentityHandle newIdentity, Action<T> executeOperation, T state)
             {
-#if NETSTANDARD
-                WindowsIdentity.RunImpersonated(newIdentity?.Handle ?? Microsoft.Win32.SafeHandles.SafeAccessTokenHandle.InvalidHandle, () => executeOperation.Invoke(state));
-#else
+#if NET35 || NET45 || NET46
                 WindowsImpersonationContext context = null;
                 try
                 {
@@ -316,6 +314,8 @@ namespace NLog.Targets.Wrappers
                 {
                     context?.Undo();
                 }
+#else
+                WindowsIdentity.RunImpersonated(newIdentity?.Handle ?? Microsoft.Win32.SafeHandles.SafeAccessTokenHandle.InvalidHandle, () => executeOperation.Invoke(state));
 #endif
             }
         }
