@@ -56,9 +56,9 @@ namespace NLog.WindowsIdentity.Tests
         }
 
 #if NETFRAMEWORK
-        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
-#else
         [Fact]
+#else
+        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #endif
         public void ImpersonatingWrapperTest()
         {
@@ -101,9 +101,9 @@ namespace NLog.WindowsIdentity.Tests
         }
 
 #if NETFRAMEWORK
-        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
-#else
         [Fact]
+#else
+        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #endif
         public void RevertToSelfTest()
         {
@@ -208,9 +208,9 @@ namespace NLog.WindowsIdentity.Tests
         }
 
 #if NETFRAMEWORK
-        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
-#else
         [Fact]
+#else
+        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #endif
         public void ImpersonatingWrapperNegativeTest()
         {
@@ -243,9 +243,9 @@ namespace NLog.WindowsIdentity.Tests
         }
 
 #if NETFRAMEWORK
-        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
-#else
         [Fact]
+#else
+        [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
 #endif
         public void ImpersonatingWrapperNegativeTest2()
         {
