@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition=" '$(TargetFrameworks)' == '' ">net46;net45;net35;netstandard1.5;netstandard2.0;net6.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(TargetFrameworks)' == '' ">net46;net45;net35;netstandard1.5;netstandard2.0;net6.0-windows;net8.0-windows</TargetFrameworks>
     <RootNamespace>NLog</RootNamespace>
 
     <VersionPrefix>5.3.0</VersionPrefix>
@@ -73,8 +73,12 @@ ImpersonatingWrapper Target Docs:
     <Title>NLog.WindowsIdentity for NetStandard 2.0</Title>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <Title>NLog.WindowsIdentity for Net 6.0</Title>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0-windows' ">
+    <Title>NLog.WindowsIdentity for .Net 6.0</Title>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0-windows' ">
+    <Title>NLog.WindowsIdentity for .Net 8.0</Title>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' or '$(TargetFramework)' == 'net45' or '$(TargetFramework)' == 'net35' ">
