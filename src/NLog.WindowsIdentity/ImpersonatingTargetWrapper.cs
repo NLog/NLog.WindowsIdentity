@@ -53,14 +53,17 @@ namespace NLog.Targets.Wrappers
     [Target("ImpersonatingWrapper", IsWrapper = true)]
     public class ImpersonatingTargetWrapper : WrapperTargetBase
     {
-        private NewIdentityHandle _newIdentity;
+        private readonly Action<AsyncLogEventInfo> _writeLogEvent;
+        private readonly Action<IList<AsyncLogEventInfo>> _writeLogEvents;
+        private NewIdentityHandle? _newIdentity;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="ImpersonatingTargetWrapper" /> class.
         /// </summary>
         public ImpersonatingTargetWrapper()
-            : this(null)
         {
+            _writeLogEvent = (l) => WrappedTarget?.WriteAsyncLogEvent(l);
+            _writeLogEvents = (l) => WrappedTarget?.WriteAsyncLogEvents(l);
         }
 
         /// <summary>
@@ -79,6 +82,7 @@ namespace NLog.Targets.Wrappers
         /// </summary>
         /// <param name="wrappedTarget">The wrapped target.</param>
         public ImpersonatingTargetWrapper(Target wrappedTarget)
+            : this()
         {
             WrappedTarget = wrappedTarget;
         }
@@ -90,13 +94,13 @@ namespace NLog.Targets.Wrappers
         /// If you use the user principal name (UPN) format, User@DNSDomainName, the <see cref="Domain"/> must be NULL.
         /// </remarks>
         /// <docgen category='Impersonation Options' order='10' />
-        public Layout UserName { get; set; }
+        public Layout? UserName { get; set; }
 
         /// <summary>
         /// Gets or sets the user account password.
         /// </summary>
         /// <docgen category='Impersonation Options' order='10' />
-        public Layout Password { get; set; }
+        public Layout? Password { get; set; }
 
         /// <summary>
         /// Gets or sets Windows domain name to change context to.
@@ -141,7 +145,7 @@ namespace NLog.Targets.Wrappers
             base.InitializeTarget();
         }
 
-        private NewIdentityHandle ResolveNewIdentity(LogEventInfo logEvent, bool forceCreate)
+        private NewIdentityHandle? ResolveNewIdentity(LogEventInfo logEvent, bool forceCreate)
         {
             if (RevertToSelf)
             {
@@ -192,13 +196,9 @@ namespace NLog.Targets.Wrappers
         /// <param name="logEvent">The log event.</param>
         protected override void Write(AsyncLogEventInfo logEvent)
         {
-            if (_writeLogEvent is null)
-                _writeLogEvent = (l) => WrappedTarget.WriteAsyncLogEvent(l);
-
             var newIdentity = ResolveNewIdentity(logEvent.LogEvent, true);
             RunImpersonated(newIdentity, _writeLogEvent, logEvent);
         }
-        private Action<AsyncLogEventInfo> _writeLogEvent;
 
         /// <summary>
         /// Changes the security context, forwards the call to the <see cref="WrapperTargetBase.WrappedTarget"/>.Write()
@@ -207,9 +207,6 @@ namespace NLog.Targets.Wrappers
         /// <param name="logEvents">Log events.</param>
         protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
-            if (_writeLogEvents is null)
-                _writeLogEvents = (l) => WrappedTarget.WriteAsyncLogEvents(l);
-
             if (logEvents.Count > 0)
             {
                 var firstLogEvent = logEvents[0].LogEvent;
@@ -217,7 +214,6 @@ namespace NLog.Targets.Wrappers
                 RunImpersonated(newIdentity, _writeLogEvents, logEvents);
             }
         }
-        private Action<IList<AsyncLogEventInfo>> _writeLogEvents;
 
         /// <summary>
         /// Flush any pending log messages (in case of asynchronous targets).
@@ -226,10 +222,10 @@ namespace NLog.Targets.Wrappers
         protected override void FlushAsync(AsyncContinuation asyncContinuation)
         {
             var newIdentity = ResolveNewIdentity(LogEventInfo.CreateNullEvent(), true);
-            RunImpersonated(newIdentity, (s) => WrappedTarget.Flush(s), asyncContinuation);
+            RunImpersonated(newIdentity, (s) => WrappedTarget?.Flush(s), asyncContinuation);
         }
 
-        private void RunImpersonated<T>(NewIdentityHandle newIdentity, Action<T> executeOperation, T state)
+        private static void RunImpersonated<T>(NewIdentityHandle? newIdentity, Action<T> executeOperation, T state)
         {
             NewIdentityHandle.RunImpersonated(newIdentity, executeOperation, state);
         }
@@ -240,19 +236,20 @@ namespace NLog.Targets.Wrappers
             public string Domain { get; }
             public int Password { get; }
 
-#if NETSTANDARD
-            public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle Handle { get; }
-#else
+#if NETFRAMEWORK
             public WindowsIdentity Handle { get; }
             private readonly IntPtr _handle = IntPtr.Zero;
-
+#else
+            public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle Handle { get; }
 #endif
+
             public NewIdentityHandle(string userName, string domain, string password, SecurityLogOnType logOnType, LogOnProviderType logOnProvider, SecurityImpersonationLevel impersonationLevel)
             {
                 UserName = userName;
                 Domain = domain;
                 Password = password?.GetHashCode() ?? 0;
 
+#pragma warning disable CS8604 // Possible null reference argument.
                 if (!NativeMethods.LogonUser(
                     userName,
                     domain,
@@ -263,10 +260,9 @@ namespace NLog.Targets.Wrappers
                 {
                     throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
+#pragma warning restore CS8604 // Possible null reference argument.
 
-#if NETSTANDARD
-                Handle = logonHandle;
-#else
+#if NETFRAMEWORK
                 // adapted from:
                 // https://www.codeproject.com/csharp/cpimpersonation1.asp
                 if (!NativeMethods.DuplicateToken(logonHandle, (int)impersonationLevel, out _handle))
@@ -279,6 +275,8 @@ namespace NLog.Targets.Wrappers
 
                 // create new identity using new primary token)
                 Handle = new WindowsIdentity(_handle);
+#else
+                Handle = logonHandle;
 #endif
             }
 
@@ -290,7 +288,7 @@ namespace NLog.Targets.Wrappers
             public void Close()
             {
                 Handle.Dispose();
-#if !NETSTANDARD
+#if NETFRAMEWORK
                 if (_handle != IntPtr.Zero)
                     NativeMethods.CloseHandle(_handle);
 #endif
@@ -301,12 +299,10 @@ namespace NLog.Targets.Wrappers
                 Close();
             }
 
-            internal static void RunImpersonated<T>(NewIdentityHandle newIdentity, Action<T> executeOperation, T state)
+            internal static void RunImpersonated<T>(NewIdentityHandle? newIdentity, Action<T> executeOperation, T state)
             {
-#if NETSTANDARD
-                WindowsIdentity.RunImpersonated(newIdentity?.Handle ?? Microsoft.Win32.SafeHandles.SafeAccessTokenHandle.InvalidHandle, () => executeOperation.Invoke(state));
-#else
-                WindowsImpersonationContext context = null;
+#if NETFRAMEWORK
+                WindowsImpersonationContext? context = null;
                 try
                 {
                     context = newIdentity?.Handle.Impersonate() ?? WindowsIdentity.Impersonate(IntPtr.Zero);
@@ -316,6 +312,8 @@ namespace NLog.Targets.Wrappers
                 {
                     context?.Undo();
                 }
+#else
+                WindowsIdentity.RunImpersonated(newIdentity?.Handle ?? Microsoft.Win32.SafeHandles.SafeAccessTokenHandle.InvalidHandle, () => executeOperation.Invoke(state));
 #endif
             }
         }

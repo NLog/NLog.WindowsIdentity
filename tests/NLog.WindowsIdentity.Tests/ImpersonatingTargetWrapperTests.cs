@@ -55,7 +55,7 @@ namespace NLog.WindowsIdentity.Tests
             LogManager.ThrowExceptions = true;
         }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
         [Fact]
 #else
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
@@ -100,7 +100,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown();
         }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
         [Fact]
 #else
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
@@ -207,7 +207,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown();
         }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
         [Fact]
 #else
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
@@ -242,7 +242,7 @@ namespace NLog.WindowsIdentity.Tests
             logFactory.Shutdown(); // will not fail because Initialize() failed
         }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
         [Fact]
 #else
         [Fact(Skip = "CreateUserIfNotPresent fails with NetCore")]
@@ -338,7 +338,7 @@ namespace NLog.WindowsIdentity.Tests
                     return;
                 }
 
-#if !NETSTANDARD
+#if NETFRAMEWORK
                 var user = new UserPrincipal(context);
                 user.SetPassword(NLogTestUserPassword);
                 user.Name = NLogTestUser;
@@ -360,11 +360,24 @@ namespace NLog.WindowsIdentity.Tests
 
         private void DeleteUser()
         {
-            using (var context = new PrincipalContext(ContextType.Machine, LocalMachineName))
-            using (var up = UserPrincipal.FindByIdentity(context, IdentityType.Name, NLogTestUser))
+            try
             {
-                if (up != null)
-                    up.Delete();
+                using (var context = new PrincipalContext(ContextType.Machine, LocalMachineName))
+                using (var up = UserPrincipal.FindByIdentity(context, IdentityType.Name, NLogTestUser))
+                {
+                    try
+                    {
+                        up?.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to Delete NLogTestUser: " + ex.ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to Find NLogTestUser: " + ex.ToString());
             }
         }
     }
