@@ -360,11 +360,24 @@ namespace NLog.WindowsIdentity.Tests
 
         private void DeleteUser()
         {
-            using (var context = new PrincipalContext(ContextType.Machine, LocalMachineName))
-            using (var up = UserPrincipal.FindByIdentity(context, IdentityType.Name, NLogTestUser))
+            try
             {
-                if (up != null)
-                    up.Delete();
+                using (var context = new PrincipalContext(ContextType.Machine, LocalMachineName))
+                using (var up = UserPrincipal.FindByIdentity(context, IdentityType.Name, NLogTestUser))
+                {
+                    try
+                    {
+                        up?.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to Delete NLogTestUser: " + ex.ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to Find NLogTestUser: " + ex.ToString());
             }
         }
     }

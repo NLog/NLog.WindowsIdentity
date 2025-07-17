@@ -38,15 +38,7 @@ namespace NLog.Internal
 
     internal static class NativeMethods
     {
-#if !NETFRAMEWORK
-        // obtains user token
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-#if !NET35
-        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-#endif
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool LogonUser(string pszUsername, string pszDomain, string pszPassword, int dwLogonType, int dwLogonProvider, out Microsoft.Win32.SafeHandles.SafeAccessTokenHandle phToken);
-#else
+#if NETFRAMEWORK
         // obtains user token
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 #if !NET35
@@ -70,6 +62,12 @@ namespace NLog.Internal
 #endif
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool DuplicateToken(IntPtr existingTokenHandle, int impersonationLevel, out IntPtr duplicateTokenHandle);
+#else
+        // obtains user token
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool LogonUser(string pszUsername, string pszDomain, string pszPassword, int dwLogonType, int dwLogonProvider, out Microsoft.Win32.SafeHandles.SafeAccessTokenHandle phToken);
 #endif
     }
 }

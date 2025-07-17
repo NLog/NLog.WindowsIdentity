@@ -12,7 +12,7 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
     `Install-Package NLog.WindowsIdentity` or in your csproj:
 
     ```xml
-    <PackageReference Include="NLog.WindowsIdentity" Version="5.*" />
+    <PackageReference Include="NLog.WindowsIdentity" Version="6.*" />
     ```
 
 2) Add to your nlog.config:
