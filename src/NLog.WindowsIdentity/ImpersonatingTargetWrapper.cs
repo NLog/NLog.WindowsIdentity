@@ -258,7 +258,7 @@ namespace NLog.Targets.Wrappers
                     (int)logOnProvider,
                     out var logonHandle))
                 {
-                    throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
 #pragma warning restore CS8604 // Possible null reference argument.
 
