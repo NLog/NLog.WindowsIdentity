@@ -56,7 +56,7 @@ namespace NLog.Targets.Wrappers
         private readonly Action<AsyncLogEventInfo> _writeLogEvent;
         private readonly Action<IList<AsyncLogEventInfo>> _writeLogEvents;
         private NewIdentityHandle? _newIdentity;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ImpersonatingTargetWrapper" /> class.
         /// </summary>
@@ -258,7 +258,7 @@ namespace NLog.Targets.Wrappers
                     (int)logOnProvider,
                     out var logonHandle))
                 {
-                    throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
 #pragma warning restore CS8604 // Possible null reference argument.
 
