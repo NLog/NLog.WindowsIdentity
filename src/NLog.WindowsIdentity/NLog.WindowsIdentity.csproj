@@ -4,7 +4,7 @@
     <TargetFrameworks Condition=" '$(TargetFrameworks)' == '' ">net46;net35;netstandard2.0;netstandard2.1;net8.0-windows</TargetFrameworks>
     <RootNamespace>NLog</RootNamespace>
 
-    <VersionPrefix>6.0.0</VersionPrefix>
+    <VersionPrefix>6.0.2</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 
     <AssemblyVersion>6.0.0.0</AssemblyVersion>
@@ -24,8 +24,8 @@
 
     <PackageReleaseNotes>
 Changelog:
-- Update to NLog v6
-- Enable Nullable API
+- NLog v6.0.2
+- Added TargetFramework net8.0-windows
       
 Windows-Identity LayoutRenderer Docs:
 - https://github.com/NLog/NLog/wiki/Windows-Identity-Layout-Renderer
@@ -49,7 +49,6 @@ ImpersonatingWrapper Target Docs:
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <IsTrimmable Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">true</IsTrimmable>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">true</IsAotCompatible>
     <Nullable>enable</Nullable>
@@ -89,7 +88,7 @@ ImpersonatingWrapper Target Docs:
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="NLog" Version="6.0.1" />
+    <PackageReference Include="NLog" Version="6.0.2" />
   </ItemGroup>
 
   <PropertyGroup>
