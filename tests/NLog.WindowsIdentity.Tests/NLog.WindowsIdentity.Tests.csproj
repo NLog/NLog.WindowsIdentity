@@ -26,7 +26,7 @@
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
     <PackageReference Include="System.DirectoryServices.Protocols" Version="8.0.0" />
-  </ItemGroup> 
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\NLog.WindowsIdentity\NLog.WindowsIdentity.csproj" />

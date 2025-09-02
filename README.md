@@ -4,7 +4,6 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
 [![Version](https://badge.fury.io/nu/NLog.WindowsIdentity.svg)](https://www.nuget.org/packages/NLog.WindowsIdentity)
 [![AppVeyor](https://img.shields.io/appveyor/ci/nlog/NLog-WindowsIdentity/master.svg)](https://ci.appveyor.com/project/nlog/NLog-WindowsIdentity/branch/master)
 
-
 ### How to install
 
 1) Install the package
