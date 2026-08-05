@@ -42,6 +42,13 @@ namespace NLog.LayoutRenderers
     [LayoutRenderer("windows-identity")]
     public class WindowsIdentityLayoutRenderer : LayoutRenderer
     {
+#if !NET35
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, CachedIdentity> _identityNameCache = new();
+        private static long _cacheVersion;
+#endif
+
+        private string _defaultIdentityName = string.Empty;
+
         /// <summary>
         /// Gets or sets a value indicating whether domain name should be included.
         /// </summary>
@@ -55,32 +62,93 @@ namespace NLog.LayoutRenderers
         public bool UserName { get; set; } = true;
 
         /// <inheritdoc/>
+        protected override void InitializeLayoutRenderer()
+        {
+            using (var identity = WindowsIdentity.GetCurrent(ifImpersonating: false))
+            {
+                _defaultIdentityName = identity?.Name ?? string.Empty;
+            }
+
+            base.InitializeLayoutRenderer();
+        }
+
+        /// <inheritdoc/>
         protected override void Append(StringBuilder builder, LogEventInfo logEvent)
         {
-            using (var currentIdentity = WindowsIdentity.GetCurrent())
+            var identityName = GetIdentityName();
+            if (UserName && Domain)
             {
-                var identityName = currentIdentity?.Name ?? string.Empty;
-                if (UserName && Domain)
-                {
+                builder.Append(identityName);
+            }
+            else if (UserName)
+            {
+                int pos = identityName.LastIndexOf('\\');
+                if (pos >= 0)
+                    builder.Append(identityName, pos + 1, identityName.Length - (pos + 1));
+                else
                     builder.Append(identityName);
-                }
-                else if (UserName)
+            }
+            else if (Domain)
+            {
+                int pos = identityName.IndexOf('\\');
+                if (pos >= 0)
+                    builder.Append(identityName, 0, pos);
+                else
+                    builder.Append(identityName);
+            }
+        }
+
+        private string GetIdentityName()
+        {
+            // Fast path: most applications never impersonate.
+            using var identity = WindowsIdentity.GetCurrent(ifImpersonating: true);
+            if (identity is null)
+                return _defaultIdentityName;
+
+#if !NET35
+            string? sid = identity.User?.Value ?? string.Empty;
+            if (!string.IsNullOrEmpty(sid))
+            {
+                if (_identityNameCache.TryGetValue(sid, out var cachedIdentity))
+                    return cachedIdentity.Name;
+
+                string identityName = identity.Name;
+                long insertVersion = System.Threading.Interlocked.Increment(ref _cacheVersion);
+                cachedIdentity = _identityNameCache.GetOrAdd(sid, new CachedIdentity(identityName, insertVersion));
+                if (_identityNameCache.Count > 128)
+                    TrimCache(insertVersion - 64);
+                return cachedIdentity.Name;
+            }
+#endif
+            return identity.Name;            
+        }
+
+#if !NET35
+        private static void TrimCache(long minimumVersion)
+        {
+            foreach (var entry in _identityNameCache)
+            {
+                if (entry.Value.Version < minimumVersion)
                 {
-                    int pos = identityName.LastIndexOf('\\');
-                    if (pos >= 0)
-                        builder.Append(identityName, pos + 1, identityName.Length - (pos + 1));
-                    else
-                        builder.Append(identityName);
-                }
-                else if (Domain)
-                {
-                    int pos = identityName.IndexOf('\\');
-                    if (pos >= 0)
-                        builder.Append(identityName, 0, pos);
-                    else
-                        builder.Append(identityName);
+                    _identityNameCache.TryRemove(entry.Key, out _);
                 }
             }
         }
+
+
+        private readonly struct CachedIdentity
+        {
+            public CachedIdentity(string name, long version)
+            {
+                Name = name;
+                Version = version;
+            }
+
+            public string Name { get; }
+
+            public long Version { get; }
+        }
+#endif
     }
+
 }
