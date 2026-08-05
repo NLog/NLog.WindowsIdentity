@@ -43,6 +43,9 @@ namespace NLog.WindowsIdentity.Tests
     using NLog.Targets.Wrappers;
     using Xunit;
 
+#if NET
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
     public sealed class ImpersonatingTargetWrapperTests : IDisposable
     {
         private const string NLogTestUser = "NLogTestUser";
