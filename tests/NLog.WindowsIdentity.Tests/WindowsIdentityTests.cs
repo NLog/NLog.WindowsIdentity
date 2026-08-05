@@ -34,8 +34,12 @@
 namespace NLog.WindowsIdentity.Tests
 {
     using System;
+    using System.Linq;
     using Xunit;
 
+#if NET
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
     public class WindowsIdentityTests
     {
         public WindowsIdentityTests()
@@ -54,17 +58,17 @@ namespace NLog.WindowsIdentity.Tests
                 .SetupExtensions(ext => ext.RegisterAssembly(typeof(NLog.LayoutRenderers.WindowsIdentityLayoutRenderer).Assembly))
                 .LoadConfigurationFromXml(@"
                 <nlog>
-                    <targets><target type='debug' name='debug' layout='${windows-identity} - ${windows-identity:domain=false} - ${windows-identity:username=false}' /></targets>
-                    <rules><logger name='*' writeTo='debug' /></rules>
+                    <targets><target type='memory' name='memory' layout='${windows-identity} - ${windows-identity:domain=false} - ${windows-identity:username=false}' /></targets>
+                    <rules><logger name='*' writeTo='memory' /></rules>
                 </nlog>").LogFactory;
 
-            var debugTarget = logFactory.Configuration.FindTargetByName<NLog.Targets.DebugTarget>("debug");
+            var memoryTarget = logFactory.Configuration.FindTargetByName<NLog.Targets.MemoryTarget>("memory");
             logFactory.GetCurrentClassLogger().Info("Test Message");
-            Assert.Equal(1, debugTarget.Counter);
+            Assert.Single(memoryTarget.Logs);
 #if !DEBUG
-            if (!string.IsNullOrEmpty(debugTarget.LastMessage))
+            if (!string.IsNullOrEmpty(memoryTarget.Logs.First()))
 #endif
-            Assert.Equal($"{fullName} - {userName} - {userDomain}", debugTarget.LastMessage);
+            Assert.Equal($"{fullName} - {userName} - {userDomain}", memoryTarget.Logs.First());
         }
     }
 }

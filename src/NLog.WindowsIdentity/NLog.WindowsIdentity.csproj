@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition=" '$(TargetFrameworks)' == '' ">net46;net35;netstandard2.0;netstandard2.1;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(TargetFrameworks)' == '' ">net46;net35;netstandard2.0;netstandard2.1;net8.0-windows;net10.0-windows</TargetFrameworks>
     <RootNamespace>NLog</RootNamespace>
 
-    <VersionPrefix>6.0.2</VersionPrefix>
+    <VersionPrefix>6.1.4</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 
     <AssemblyVersion>6.0.0.0</AssemblyVersion>
@@ -24,8 +24,10 @@
 
     <PackageReleaseNotes>
 Changelog:
-- NLog v6.0.2
-- Added TargetFramework net8.0-windows
+
+- Added TargetFramework net10.0-windows
+- Optimize WindowsIdentity LayoutRenderer by caching Sid to Name conversion
+- Updated NLog v6.1.4
 
 Windows-Identity LayoutRenderer Docs:
 - https://github.com/NLog/NLog/wiki/Windows-Identity-Layout-Renderer
@@ -77,6 +79,10 @@ ImpersonatingWrapper Target Docs:
     <Title>NLog.WindowsIdentity for .NET 8.0</Title>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0-windows' ">
+    <Title>NLog.WindowsIdentity for .NET 10.0</Title>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -87,8 +93,8 @@ ImpersonatingWrapper Target Docs:
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="NLog" Version="6.0.2" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.301" PrivateAssets="All" />
+    <PackageReference Include="NLog" Version="6.1.4" />
   </ItemGroup>
 
   <PropertyGroup>
