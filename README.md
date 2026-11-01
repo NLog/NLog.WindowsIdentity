@@ -2,7 +2,7 @@
 NLog extensions for displaying [User Windows Identity](https://github.com/NLog/NLog/wiki/Windows-Identity-Layout-Renderer) and [target wrapper for user impersonation](https://github.com/NLog/NLog/wiki/ImpersonatingWrapper-target)
 
 [![Version](https://badge.fury.io/nu/NLog.WindowsIdentity.svg)](https://www.nuget.org/packages/NLog.WindowsIdentity)
-[![AppVeyor](https://img.shields.io/appveyor/ci/nlog/NLog-WindowsIdentity/master.svg)](https://ci.appveyor.com/project/nlog/NLog-WindowsIdentity/branch/master)
+[![CI](https://github.com/NLog/NLog.WindowsIdentity/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/NLog/NLog.WindowsIdentity/actions/workflows/ci.yml)
 
 ### How to install
 
