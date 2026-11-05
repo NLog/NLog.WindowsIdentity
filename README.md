@@ -3,6 +3,7 @@ NLog extensions for displaying [User Windows Identity](https://github.com/NLog/N
 
 [![Version](https://badge.fury.io/nu/NLog.WindowsIdentity.svg)](https://www.nuget.org/packages/NLog.WindowsIdentity)
 [![CI](https://github.com/NLog/NLog.WindowsIdentity/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/NLog/NLog.WindowsIdentity/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/NLog/NLog.WindowsIdentity/graph/badge.svg?token=ZWW19C0NIU)](https://codecov.io/gh/NLog/NLog.WindowsIdentity)
 
 ### How to install
 
