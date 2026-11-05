@@ -183,6 +183,8 @@ publish/
 PublishScripts/
 
 # NuGet Packages
+# Package icon downloaded during packaging
+N.png
 *.nupkg
 # NuGet Symbol Packages
 *.snupkg
